@@ -1,0 +1,44 @@
+Index: gc/network.h
+===================================================================
+RCS file: /cvsroot/devkitpro/libogc/gc/network.h,v
+retrieving revision 1.12
+diff -u -r1.12 network.h
+--- gc/network.h	23 May 2008 16:02:41 -0000	1.12
++++ gc/network.h	18 Aug 2008 23:28:54 -0000
+@@ -237,6 +237,7 @@
+ s32 if_configex(struct in_addr *local_ip,struct in_addr *netmask,struct in_addr *gateway,boolean use_dhcp);
+ 
+ s32 net_init();
++s32 net_deinit();
+ s32 net_socket(u32 domain,u32 type,u32 protocol);
+ s32 net_bind(s32 s,struct sockaddr *name,socklen_t namelen);
+ s32 net_listen(s32 s,u32 backlog);
+Index: libogc/network_wii.c
+===================================================================
+RCS file: /cvsroot/devkitpro/libogc/libogc/network_wii.c,v
+retrieving revision 1.15
+diff -u -r1.15 network_wii.c
+--- libogc/network_wii.c	5 Jun 2008 09:34:10 -0000	1.15
++++ libogc/network_wii.c	18 Aug 2008 23:28:13 -0000
+@@ -326,6 +326,20 @@
+ 	return ret;	
+ }
+ 
++s32 net_deinit(void)
++{
++	if(net_ip_top_fd < 0) return 0;
++	
++	IOS_Close(net_ip_top_fd);
++	net_ip_top_fd = -1;
++	
++	if(__net_hid < 0) return 0;
++	
++	iosDestroyHeap(__net_hid);
++	__net_hid = -1;
++	return 0;
++}
++
+ 
+ /* Returned value is a static buffer -- this function is not threadsafe! */
+ struct hostent * net_gethostbyname(char *addrString)
+
